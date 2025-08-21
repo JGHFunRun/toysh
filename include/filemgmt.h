@@ -5,7 +5,7 @@
  * This file is part of jgsh - JGHFunRun's shell
  *
  * This program is free software, licensed under the MIT license. You may
- * distribute and/or modify it according to the terms of the MIT license
+ * distribute and/or modify it according to the terms of the MIT license.
  */
 
 #ifndef FILEMGMT_H

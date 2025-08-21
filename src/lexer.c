@@ -102,26 +102,25 @@ void nextTok(FILE *fp) {
 	assert(line[len]   == '\0');
 	assert(line[len-1] == '\n');
 
+	printf("%s", line);
+
 	for (size_t i=0; i<len; i++) {
 	}
-
-	printf("%s", line);
 }
+
+#define STR_TOK_TYPE(TOK_TYPE) \
+	case TOK_TYPE: \
+		return (#TOK_TYPE)
 
 char const *stringifyTokType(TokType tt) {
 	switch (tt) {
-		case TOK_COMMENT:
-			return "TOK_COMMENT";
-		case TOK_UNDETERMINED:
-			return "TOK_UNDETERMINED";
-		case TOK_LITERAL:
-			return "TOK_LITERAL";
-		case TOK_WHITESPACE:
-			return "TOK_WHITESPACE";
-		case TOK_ERROR:
-			return "TOK_ERROR";
+		STR_TOK_TYPE(TOK_COMMENT);
+		STR_TOK_TYPE(TOK_UNDETERMINED);
+		STR_TOK_TYPE(TOK_LITERAL);
+		STR_TOK_TYPE(TOK_WHITESPACE);
+		STR_TOK_TYPE(TOK_ERROR);
 		default:
-			eprintf("Unknown TokType: %d\n", tt);
+			eprintf("Unknown TokType during stringification: %d\n", tt);
 			exit(3);
 	}
 }
@@ -132,15 +131,16 @@ char const *stringifyTokType(TokType tt) {
 /// @param fp `FILE*` to print to
 /// @param tok `Token` to print
 int fprintTok(FILE *fp, Token tok) {
-	return fprintf(fp, "(%s)", stringifyTokType(t.type));
+	return fprintf(fp, "(%s)",
+	               stringifyTokType(tok.type));
 }
 
-/// @brief Print \p tok to `stderr`. See `fprintTok()` for more details.
+/// @brief Prints \p tok to `stderr`. See `fprintTok()` for more details.
 int eprintTok(Token tok) {
 	return fprintTok(stderr, tok);
 }
 
-/// @brief Print \p tok to `stdout`. See `fprintTok()` for more details.
+/// @brief Prints \p tok to `stdout`. See `fprintTok()` for more details.
 int printTok(Token tok) {
 	return fprintTok(stdout, tok);
 }

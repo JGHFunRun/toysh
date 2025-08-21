@@ -4,10 +4,10 @@
  *
  * Copyright (C) 2025 JGHFunRun
  *
- * This file is part of jgsh - JGHFunRun's shell
+ * This file is part of ToySH - JGHFunRun's toy shell
  *
  * This program is free software, licensed under the MIT license. You may
- * distribute and/or modify it according to the terms of the MIT license
+ * distribute and/or modify it according to the terms of the MIT license.
  */
 
 #ifndef NO_MACROMGMT_H

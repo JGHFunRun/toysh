@@ -2,11 +2,17 @@
  *
  * Copyright (C) 2025 JGHFunRun
  *
- * This file is part of toysh - JGHFunRun's toy shell
+ * This file is part of ToySH - JGHFunRun's Toy Shell
  *
  * This program is free software, licensed under the MIT license. You may
  * distribute and/or modify it according to the terms of the MIT license.
  */
+
+#include <alloc.h>
+
+#include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
 
 /// @brief Attempts to reallocate \p *buf to be at least \p new_sz bytes and
 /// updates \p *buf and \p *sz if successful

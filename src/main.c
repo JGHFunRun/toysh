@@ -1,8 +1,8 @@
-/* main.c: Entry point to jgsh
+/* main.c: Entry point to ToySH
  *
  * Copyright (C) 2025 JGHFunRun
  *
- * This file is part of jgsh - JGHFunRun's shell
+ * This file is part of ToySH - JGHFunRun's Toy Shell
  *
  * This program is free software, licensed under the MIT license. You may
  * distribute and/or modify it according to the terms of the MIT license.
@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// TODO: heavy cleanup
 int main(int argc, char const *const *argv) {
 	ArgInfo arg_info;
 	parseArgs(&arg_info, argc, argv);
