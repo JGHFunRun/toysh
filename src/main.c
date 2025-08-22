@@ -22,7 +22,7 @@ int main(int argc, char const *const *argv) {
 
 	initShell(&state, &arg_info);
 
-	int retcode = execFile(&state, arg_info.filename);
+	int retcode = execFilep(&state, state.fin);
 
 	printf("Process exited with code %i\n", retcode);
 

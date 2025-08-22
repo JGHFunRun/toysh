@@ -16,7 +16,8 @@ typedef struct Charset {
 		CS_LIST,
 		CS_REGION,
 		CS_UNION,
-		CS_COMPLEMENT,
+		CS_LCOMPLEMENT,
+		CS_UCOMPLEMENT,
 	} set_type;
 
 	union {
@@ -52,8 +53,13 @@ bool isInCharset(Charset const *cs, char c);
 	.subsets = { __VA_ARGS__ __VA_OPT__(,) NULL } \
 }
 
-#define DCS_COMPLEMENT(...) { \
-	.set_type = CS_COMPLEMENT, \
+#define DCS_LCOMPLEMENT(CHARS) { \
+	.set_type = CS_LCOMPLEMENT, \
+	.list = CHARS, \
+}
+
+#define DCS_UCOMPLEMENT(...) { \
+	.set_type = CS_UCOMPLEMENT, \
 	.subsets = { __VA_ARGS__ __VA_OPT__(,) NULL } \
 }
 

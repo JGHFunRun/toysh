@@ -16,28 +16,33 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
 void initShell(ShellState *output, ArgInfo const *arg_info) {
+	char const *filename = arg_info->filename;
+
 	ShellState wip = {
 		.shell_name = arg_info->shell_name,
-		.arg0 = arg_info->filename != NULL
-			? arg_info->filename
-			: arg_info->shell_name,
+		.arg0 = filename != NULL
+			? filename : arg_info->shell_name,
 		.prog_args = arg_info->prog_args,
 		.prog_argc = arg_info->prog_argc,
+		.filename = filename,
+		.fin = filename != NULL
+			? fopen(filename, "r") : stdin,
 	};
-}
 
-int execFile(ShellState *state, char const *filename) {
-	FILE *fp = filename == NULL ? stdin : fopen(filename, "r");
-
-	if (fp == NULL) {
+	if (wip.fin == NULL) {
 		eprintf("Failed to open file: %s\nerrno: %d\n",
 			filename, errno);
 
 		exit(1);
 	}
 
+	memcpy(output, &wip, sizeof(ShellState));
+}
+
+int execFilep(ShellState *state, FILE *fp) {
 	nextTok(fp);
 
 	fclose(fp);

@@ -9,7 +9,7 @@ project(toysh
 
 add_executable(toysh src/main.c src/args.c
 	src/shell.c src/lexer.c
-	src/filemgmt.c src/charsets.c src/alloc.c)
+	src/filemgmt.c src/charsets.c src/alloc.c src/errors.c)
 
 add_subdirectory(include/)
 

@@ -24,31 +24,6 @@
 #include <io.h>
 #endif // _WIN32
 
-/// @brief A variadic <em>printf</em>-family function that outputs to `stderr`
-///
-/// Equivalent to calling `vfprintf(stderr, fmt, ap)`
-///
-/// @param fmt Standard `printf` format string
-/// @param ap Standard `va_list` variadic arguments to <em>vprintf</em>-family
-int veprintf(char const *restrict fmt, va_list ap) {
-	return vfprintf(stderr, fmt, ap);
-}
-
-/// @brief A <em>printf</em>-family function that outputs to `stderr`
-///
-/// Equivalent to calling `fprintf(stderr, fmt, ...)`
-///
-/// @param fmt Standard `printf` format string
-/// @param ... Standard variadic arguments to `printf`
-int eprintf(char const *restrict fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	int rval = veprintf(fmt, ap);
-	va_end(ap);
-
-	return rval;
-}
-
 #ifdef __unix__
 # define FPISATTY_UNIX 1
 #elifdef _WIN32 // (__unix__)

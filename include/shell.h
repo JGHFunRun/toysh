@@ -20,9 +20,12 @@ typedef struct {
 	char const *arg0;
 	char const *const *prog_args;
 	int prog_argc;
+	char const *filename;
+	FILE *fin;
+	bool interactive;
 } ShellState;
 
 void initShell(ShellState *state, ArgInfo const *arg_info);
-int execFile(ShellState *, char const *);
+int execFilep(ShellState *state, FILE *fp);
 
 #endif // SHELL_H
