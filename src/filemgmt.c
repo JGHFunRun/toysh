@@ -12,6 +12,9 @@
 
 #include "macromgmt.h"
 
+#include "alloc.h"
+
+#include <assert.h>
 #include <errno.h>
 //#include <limits.h>
 
@@ -36,7 +39,8 @@
 ///
 /// Returns true if \p fp is a terminal, or false if \p fp is not a TTY or
 /// an error occurs. On Windows, actually detects if \p fp is a "character
-/// device", which may also include certain special files.
+/// device", which also includes certain special files such as the DOS device
+/// `NUL`.
 ///
 /// The only errors are `EBADF` and `EFAULT`, although `errno` will also be set
 /// to `ENOTTY` (rarely, `EINVAL`; see below) if \p fp is not a TTY and no error
@@ -49,8 +53,6 @@
 /// cases.
 ///
 /// @param fp `FILE*` to check.
-// TODO: Currently untested
-// TODO: Does Windows _isatty() set errno?
 bool fpisatty(FILE *fp) {
 	if (fp == NULL) {
 		errno = EFAULT;
@@ -112,6 +114,78 @@ void fpunlock(FILE *fp) {
 #endif // _WIN32
 }
 
+int fgetcNonlock(FILE *fp) {
+#ifdef __unix__
+	return fgetc_unlocked(fp);
+#elifdef _WIN32; // (__unix__)
+	return _fgetc_nolock(fp);
+#endif // _WIN32
+}
+
+
+static bool delimReached(char *buf, size_t i, int delim) {
+	if (delim == LE_ANY)
+		return buf[i] == '\n' || buf[i] == '\r';
+	else if (delim > 0xFF)
+		return buf[i] == (delim & 0xFF) && buf[i-1] == (delim>>8 & 0xFF);
+	else
+		return buf[i] == delim;
+}
+
+ssize_t getdelimAt(char **restrict buf, size_t *restrict sz,
+		FILE *restrict fp, int delim, size_t whence) {
+	if (buf == NULL ||
+	    sz  == NULL ||
+	    fp  == NULL) {
+		errno = EFAULT;
+		return -1;
+	}
+
+	if (*buf == NULL)
+		*sz = 0;
+
+	size_t i = whence;
+	bool unlockAtEnd = true;
+
+	do {
+		assert(i <= *sz);
+
+		int c = fgetcNonlock(fp);
+
+		if (c == EOF) {
+			fpunlock(fp);
+			unlockAtEnd = false;
+
+			if (ferror(fp) || !feof(fp)) {
+				return -1;
+			}
+
+			break;
+		}
+
+		if (autoiAlloc(buf, sz, i) == NULL) {
+			fpunlock(fp);
+			return -1;
+		}
+
+		(*buf)[i] = c;
+
+		i++;
+	} while (!delimReached(*buf, i-1, delim));
+
+	if (autoiAlloc(buf, sz, i) == NULL) {
+		fpunlock(fp);
+		return -1;
+	}
+
+	(*buf)[i] = '\0';
+
+	if (unlockAtEnd)
+		fpunlock(fp);
+
+	return i;
+}
+
 #ifdef __unix__
 # define BUILTIN_GETLINE 1
 #endif
@@ -129,7 +203,7 @@ void fpunlock(FILE *fp) {
 ///  * [... on the Ubuntu manuals website](https://manpages.ubuntu.com/manpages/xenial/man3/getline.3.html)
 ///  * [... on the Arch manuals website](https://man.archlinux.org/man/core/man-pages/getline.3.en)
 /// * [The GNU website on line input](https://www.gnu.org/software/libc/manual/html_node/Line-Input.html)
-int getline(char **restrict str, size_t *restrict n, FILE *restrict fp) {
+ssize_t getline(char **restrict str, size_t *restrict n, FILE *restrict fp) {
 	return getlineAt(str, n, fp, 0);
 }
 # error "Support for getline() on platforms that do not provide it has not been implemented"

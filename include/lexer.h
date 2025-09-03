@@ -11,34 +11,63 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-//#include <stddef.h>
+#include "sstring.h"
+
+#include <stddef.h>
 #include <stdio.h>
 
 // TODO: Should a seperate type be used for type of raw tokens?
 typedef enum TokType {
 	TOK_COMMENT = -1,
 	TOK_UNDETERMINED = 0,
-	TOK_LITERAL,
+
+	TOK_LITERAL, ///< Called simply `TOKEN` by POSIX.
 	TOK_WHITESPACE,
 	TOK_NEWLINE,
 
+	TOK_EOF,
 	TOK_ERROR,
+	TOK_UNMATCHABLE,
 } TokType;
 
 typedef struct Token {
 	TokType type;
 } Token;
 
-/*typedef struct {
-	size_t allocd;
-	size_t len;
-	Token *tokens;
-} TokArr;*/
+
+typedef enum LexerQuoting {
+	LQ_UNQUOTED,
+	LQ_SINGLE_QUOTE,
+	LQ_DOUBLE_QUOTE,
+	LQ_DS_DOUBLE_QUOTE, ///< `$"`...
+} LexerQuoting;
+
+typedef enum LexerExpanding {
+	LE_NONE,
+	//LE_BACKTICK,
+	LE_DS_SEARCHING,
+	LE_DS_SIMPLEVAR,
+	LE_DS_CB,
+	LE_DS_PAREN
+} LexerExpanding;
+
+typedef enum LexerMode {
+	LM_ORDINARY,
+	LM_AWAIT_HERE_DOC,
+	LM_HERE_DOC,
+} LexerMode;
 
 typedef struct LexerState {
+	SString str;
+	size_t pos;
+	bool is_eof;
+
+	LexerQuoting quot_stat;
+	LexerExpanding expan_stat;
 } LexerState;
 
-void nextTok(FILE *fp);
+void initLexer(LexerState *lexer);
+TokType nextTok(LexerState *lexer);
 
 int fprintTok(FILE *fp, Token tok);
 int eprintTok(Token tok);

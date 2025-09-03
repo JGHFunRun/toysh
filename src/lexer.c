@@ -15,97 +15,99 @@
 
 #include <assert.h>
 #include <errno.h>
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-typedef struct RawToken {
-	TokType type;
-	size_t start;
-	size_t len;
-} RawToken;
+typedef struct TokSpec {
+	TokType matches_to;
 
-typedef struct RTokArr {
-	size_t allocd;
-	size_t len;
-	RawToken *toks;
-} RTokArr;
+	bool greed;
+	enum {
+		MM_END = 0,
+		MM_CHARSET,
+		MM_REGEX,
+	} match_method;
 
-static RawToken freshToken(RawToken *prevTok) {
-	RawToken tok = {
-		TOK_UNDETERMINED,
-		0,
-		0,
+	union {
+		Charset const *match_cs;
+		char const *match_regex;
+	};
+} TokSpec;
+
+#define DTS_CHARSET(TOK_TYPE, GREED, CHARSET) { \
+	.matches_to = TOK_TYPE, \
+	.greed = GREED, \
+	.match_method = MM_CHARSET, \
+	.match_cs = &CHARSET, \
+}
+
+#define DTS_REGEX(TOK_TYPE, GREED, REGEX) { \
+	.matches_to = TOK_TYPE, \
+	.greed = GREED, \
+	.match_method = MM_REGEX, \
+	.match_regex = REGEX \
+}
+
+#define DTS_END { .match_method=MM_END }
+
+const TokSpec specs[] = {
+	DTS_CHARSET(TOK_WHITESPACE, true, whitespace_chars),
+	DTS_REGEX(TOK_LITERAL, false, "'([^']*)'"),
+	DTS_CHARSET(TOK_LITERAL, true, pfn_charset),
+	DTS_END,
+};
+
+enum {
+	MS_UNMATCHABLE = -1,
+	MS_INCOMPLETE = 0,
+};
+
+void initLexer(LexerState *lexer) {
+	LexerState wip = {
+		.str = {
+			.buf = NULL,
+			.len = 0,
+			.sz = 0,
+		},
+		.pos = 0,
+		.is_eof = false,
 	};
 
-	if (prevTok != NULL) {
-		tok.start = prevTok->start + prevTok->len;
+	memcpy(lexer, &wip, sizeof(LexerState));
+}
+
+static void procChar(LexerState *lexer, char c, size_t i) {
+	if (lexer->quot_stat != LQ_UNQUOTED) {
+		assert(1==0);
 	}
 
-	return tok;
-}
-
-static const size_t rtaAllocBlock = 16;
-
-static void allocMore(RTokArr *arr) {
-	arr->allocd += rtaAllocBlock;
-
-	arr->toks = realloc(arr->toks, arr->allocd * sizeof(RawToken));
-}
-
-static RTokArr makeRTokArr() {
-	RTokArr arr = {
-		0,
-		0,
-		NULL,
-	};
-
-	allocMore(&arr);
-
-	return arr;
-}
-
-static void pushToken(RTokArr *arr, RawToken tok) {
-	assert(arr->len <= arr->allocd);
-
-	if (arr->len >= arr->allocd) {
-		allocMore(arr);
+	if (lexer->expan_stat != LE_NONE) {
+		assert(1==0);
 	}
-
-	arr->toks[arr->len] = tok;
-	arr->len++;
 }
 
+TokType nextTok(LexerState *lexer) {
+	printf("%s<EOL>\n", lexer->str.buf);
 
-void nextTok(FILE *fp) {
-	char *line = NULL;
-	size_t allocd = 0;
-
-	ssize_t len = getline(&line, &allocd, fp);
-
-	if (len < 0) {
-		int e_save = errno;
-
-		if (feof(fp)) {
-			eprintf("Unexpected <EOF> whilst reading file\n");
+	if (lexer->pos == lexer->str.len) {
+		if (!lexer->is_eof) {
+			return TOK_UNDETERMINED;
 		}
 
-		if (ferror(fp)) {
-			eprintf("Error whilst reading line\nerrno: %d\n",
-				e_save);
-		}
+		// TODO: Detect
 
-		errno = e_save;
-
-		return;
+		return TOK_EOF;
 	}
 
-	assert(line[len]   == '\0');
-	assert(line[len-1] == '\n');
+	for (size_t i=0; i < lexer->str.len; i++) {
+		char c = lexer->str.buf[i];
 
-	printf("%s", line);
-
-	for (size_t i=0; i<len; i++) {
+		procChar(lexer, c, i);
 	}
+
+	printf("Lexer pass ended.\n");
 }
 
 #define STR_TOK_TYPE(TOK_TYPE) \
@@ -119,9 +121,9 @@ char const *stringifyTokType(TokType tt) {
 		STR_TOK_TYPE(TOK_LITERAL);
 		STR_TOK_TYPE(TOK_WHITESPACE);
 		STR_TOK_TYPE(TOK_ERROR);
-		default:
-			eprintf("Unknown TokType during stringification: %d\n", tt);
-			exit(3);
+		//default:
+		//	eprintf("Unknown TokType during stringification: %d\n", tt);
+		//	exit(3);
 	}
 }
 

@@ -36,21 +36,19 @@ bool isInCharset(Charset const *cs, char c);
 #define DCS_LIST(CHARS) { \
 	.set_type = CS_LIST, \
 	.list = CHARS, \
-	.subsets = {}, \
 }
 
 #define DCS_REGION(START, END) { \
 	.set_type = CS_REGION, \
 	.region = { \
-		.start = START \
-		.end = END \
+		.start = START, \
+		.end = END, \
 	} \
-	.subsets = {}, \
 }
 
 #define DCS_UNION(...) { \
 	.set_type = CS_UNION, \
-	.subsets = { __VA_ARGS__ __VA_OPT__(,) NULL } \
+	.sets = { __VA_ARGS__ __VA_OPT__(,) NULL } \
 }
 
 #define DCS_LCOMPLEMENT(CHARS) { \
@@ -60,7 +58,15 @@ bool isInCharset(Charset const *cs, char c);
 
 #define DCS_UCOMPLEMENT(...) { \
 	.set_type = CS_UCOMPLEMENT, \
-	.subsets = { __VA_ARGS__ __VA_OPT__(,) NULL } \
+	.sets = { __VA_ARGS__ __VA_OPT__(,) NULL } \
 }
+
+extern const Charset nonascii_chars;
+//extern const Charset basic_latin_lc;
+//extern const Charset basic_latin_uc;
+extern const Charset whitespace_chars;
+//extern const Charset ignorable_chars;
+extern const Charset literal_chars;
+extern const Charset pfn_charset;
 
 #endif // CHARSETS_H

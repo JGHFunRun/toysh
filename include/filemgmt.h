@@ -14,6 +14,15 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+enum {
+	LE_LF	= 0x0A,
+	LE_CR	= 0x0D,
+	LE_LFCR = 0x0A0D,
+	LE_CRLF	= 0x0D0A,
+	/// Intended primarily for initially detecting the line ending of file
+	LE_ANY  = 0x1111,
+};
+
 int eprintf(char const *restrict fmt, ...);
 int veprintf(char const *restrict fmt, va_list ap);
 

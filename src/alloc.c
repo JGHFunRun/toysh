@@ -46,6 +46,8 @@ void *safeRealloc(void **restrict buf, size_t *restrict sz, size_t new_sz) {
 }
 
 #define ALLOC_SIZE (4)
+#define ALLOC_N (8)
+#define MIN_ALLOC_N (4)
 /// @brief Reallocates \p *buf if attempting to write `(*buf)[i]` would be a
 /// buffer overrun.
 ///
@@ -60,7 +62,7 @@ void *safeRealloc(void **restrict buf, size_t *restrict sz, size_t new_sz) {
 /// @param buf Buffer to ensure safe indexing into. Cannot be `NULL`, although
 /// \p *buf may be.
 /// @param sz Current size of buffer. Cannot be `NULL`.
-void *autoiAlloc(char **restrict buf, size_t *restrict sz, size_t i) {
+char *autoiAlloc(char **restrict buf, size_t *restrict sz, size_t i) {
 	assert(buf != NULL);
 	assert(sz != NULL);
 
@@ -70,6 +72,5 @@ void *autoiAlloc(char **restrict buf, size_t *restrict sz, size_t i) {
 		return NULL;
 	}
 
-	return i >= *sz ? safeRealloc((void**) buf, sz, i + ALLOC_SIZE)
-		: *buf;
+	return i >= *sz ? safeReallocArr(buf, sz, i) : *buf;
 }

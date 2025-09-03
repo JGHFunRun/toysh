@@ -13,7 +13,13 @@
 
 #include <stddef.h>
 
+// TODO: Rework this to operate on indices instead of sizes for array operations
+
 void *safeRealloc(void **restrict buf, size_t *restrict sz, size_t new_sz);
-void *autoiRealloc(char **restrict buf, size_t *restrict sz, size_t i);
+char *autoiAlloc(char **restrict buf, size_t *restrict sz, size_t i);
+
+#define safeReallocArr(buf, sz, new_n) \
+	((typeof(*buf)) safeRealloc((void**) buf, sz, (new_n) * sizeof(**buf)))
+
 
 #endif // ALLOC_H

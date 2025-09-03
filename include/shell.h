@@ -26,6 +26,7 @@ typedef struct {
 } ShellState;
 
 void initShell(ShellState *state, ArgInfo const *arg_info);
-int execFilep(ShellState *state, FILE *fp);
+
+int sourcefp(ShellState *state, FILE *fp);
 
 #endif // SHELL_H

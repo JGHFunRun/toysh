@@ -18,18 +18,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-void initShell(ShellState *output, ArgInfo const *arg_info) {
+void initShell(ShellState *restrict output, ArgInfo const *restrict arg_info) {
 	char const *filename = arg_info->filename;
 
 	ShellState wip = {
 		.shell_name = arg_info->shell_name,
-		.arg0 = filename != NULL
-			? filename : arg_info->shell_name,
+		.arg0 = filename != NULL ?
+			filename : arg_info->shell_name,
 		.prog_args = arg_info->prog_args,
 		.prog_argc = arg_info->prog_argc,
 		.filename = filename,
-		.fin = filename != NULL
-			? fopen(filename, "r") : stdin,
+		.fin = filename != NULL ?
+			fopen(filename, "r") : stdin,
+		.interactive = false,
 	};
 
 	if (wip.fin == NULL) {
@@ -39,13 +40,21 @@ void initShell(ShellState *output, ArgInfo const *arg_info) {
 		exit(1);
 	}
 
+	if (fpisatty(wip.fin)) {
+		eprintf("Interactive!\n");
+		wip.interactive = true;
+	}
+
 	memcpy(output, &wip, sizeof(ShellState));
 }
 
-int execFilep(ShellState *state, FILE *fp) {
-	nextTok(fp);
+int sourcefp(ShellState *restrict state, FILE *restrict fp) {
+	LexerState lstate;
+	initLexer(&lstate);
 
-	fclose(fp);
+	lstate.str.len = getline(&lstate.str.buf, &lstate.str.sz, fp);
+
+	nextTok(&lstate);
 
 	return 0;
 }
