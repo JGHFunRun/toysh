@@ -96,7 +96,8 @@ TokType nextTok(LexerState *lexer) {
 			return TOK_UNDETERMINED;
 		}
 
-		// TODO: Detect
+		// TODO: Detect if the current token can be delimited,
+		// and do so if so
 
 		return TOK_EOF;
 	}
