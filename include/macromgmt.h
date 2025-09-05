@@ -28,8 +28,16 @@
 #  define PURE_WIN32 1
 # endif // #else (__unix__)
 #elifdef __unix__ // (_WIN32)
-# define PUS__unix__
+# define PURE__unix__ 1
 #endif // __unix__
+
+// TODO: There should be a flag to indicate if win+unix should prefer windows or
+// unix methods
+// Perhaps with values to indicate any of the:
+// * Use WIN32 code when both are perfect match,
+//      but use POSIX code when non-equivalent
+// * Always use WIN32 code
+// * Always use POSIX code
 
 #endif // MACROMGMT_H
 

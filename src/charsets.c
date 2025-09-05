@@ -19,6 +19,7 @@
 const Charset nonascii_chars = DCS_REGION(0x80, 0xFF);
 
 const Charset whitespace_chars = DCS_LIST(" \t");
+const Charset newline_chars = DCS_LIST("\r\n");
 //const Charset ignorable_chars = DCS_LIST("\r");
 
 const Charset basic_latin_lc = DCS_REGION('a', 'z');
@@ -94,7 +95,7 @@ static bool isInCS_UCOMPLEMENT(Charset const *cs, char c) {
 
 #define CS_CASE(CS_TYPE) \
 	case CS_TYPE: \
-		return isIn ## CS_TYPE
+		return isIn ## CS_TYPE (cs, c)
 
 bool isInCharset(Charset const *cs, char c) {
 	switch (cs->set_type) {

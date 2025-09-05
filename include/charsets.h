@@ -65,6 +65,7 @@ extern const Charset nonascii_chars;
 //extern const Charset basic_latin_lc;
 //extern const Charset basic_latin_uc;
 extern const Charset whitespace_chars;
+extern const Charset newline_chars;
 //extern const Charset ignorable_chars;
 extern const Charset literal_chars;
 extern const Charset pfn_charset;

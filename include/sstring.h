@@ -14,6 +14,6 @@ typedef struct SString {
 } SString;
 
 ssize_t ssgetline(SString *restrict sstr, FILE *restrict fp);
-int sssetByte(SString *restrict sstr, size_t i, char c);
+char *ssset(SString *restrict sstr, size_t i, char c);
 
 #endif // SSTRING_H

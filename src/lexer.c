@@ -20,50 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct TokSpec {
-	TokType matches_to;
-
-	bool greed;
-	enum {
-		MM_END = 0,
-		MM_CHARSET,
-		MM_REGEX,
-	} match_method;
-
-	union {
-		Charset const *match_cs;
-		char const *match_regex;
-	};
-} TokSpec;
-
-#define DTS_CHARSET(TOK_TYPE, GREED, CHARSET) { \
-	.matches_to = TOK_TYPE, \
-	.greed = GREED, \
-	.match_method = MM_CHARSET, \
-	.match_cs = &CHARSET, \
-}
-
-#define DTS_REGEX(TOK_TYPE, GREED, REGEX) { \
-	.matches_to = TOK_TYPE, \
-	.greed = GREED, \
-	.match_method = MM_REGEX, \
-	.match_regex = REGEX \
-}
-
-#define DTS_END { .match_method=MM_END }
-
-const TokSpec specs[] = {
-	DTS_CHARSET(TOK_WHITESPACE, true, whitespace_chars),
-	DTS_REGEX(TOK_LITERAL, false, "'([^']*)'"),
-	DTS_CHARSET(TOK_LITERAL, true, pfn_charset),
-	DTS_END,
-};
-
-enum {
-	MS_UNMATCHABLE = -1,
-	MS_INCOMPLETE = 0,
-};
-
 void initLexer(LexerState *lexer) {
 	LexerState wip = {
 		.str = {
@@ -78,14 +34,41 @@ void initLexer(LexerState *lexer) {
 	memcpy(lexer, &wip, sizeof(LexerState));
 }
 
+#define CHAR_CAT(CHARSET, CHAR, TYPE) \
+	if (isInCharset(&(CHARSET), CHAR)) \
+		return TYPE;
+
+static TokType categChar(char c) {
+	CHAR_CAT(whitespace_chars, c, TOK_WHITESPACE);
+	CHAR_CAT(newline_chars, c, TOK_NEWLINE);
+
+	return TOK_LITERAL;
+}
+
+typedef enum ProcResult {
+	PROC_SUCC,
+	PROC_DELIM,
+	PROC_FAIL,
+} ProcResult;
+
 static void procChar(LexerState *lexer, char c, size_t i) {
-	if (lexer->quot_stat != LQ_UNQUOTED) {
+	// TODO: IMPLEMEEEENNNTINNNNGG
+	if (lexer->expan_stat != LE_NONE) {
+		eprintf("Unimplemented");
 		assert(1==0);
 	}
 
-	if (lexer->expan_stat != LE_NONE) {
+	if (lexer->quot_stat != LQ_UNQUOTED) {
+		eprintf("Unimplemented");
 		assert(1==0);
 	}
+
+	// TODO: some characters are operators in-and-of themselves. Currently,
+	// such characters are treated as literals. Help a parsa out?
+	
+	TokType tt = categChar(c);
+
+	printf("'%c' is %s\n", c, stringifyTokType(tt));
 }
 
 TokType nextTok(LexerState *lexer) {
@@ -119,9 +102,14 @@ char const *stringifyTokType(TokType tt) {
 	switch (tt) {
 		STR_TOK_TYPE(TOK_COMMENT);
 		STR_TOK_TYPE(TOK_UNDETERMINED);
+
 		STR_TOK_TYPE(TOK_LITERAL);
 		STR_TOK_TYPE(TOK_WHITESPACE);
+		STR_TOK_TYPE(TOK_NEWLINE);
+
+		STR_TOK_TYPE(TOK_EOF);
 		STR_TOK_TYPE(TOK_ERROR);
+		STR_TOK_TYPE(TOK_UNMATCHABLE);
 		//default:
 		//	eprintf("Unknown TokType during stringification: %d\n", tt);
 		//	exit(3);

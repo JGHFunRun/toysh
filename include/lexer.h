@@ -69,6 +69,7 @@ typedef struct LexerState {
 void initLexer(LexerState *lexer);
 TokType nextTok(LexerState *lexer);
 
+char const *stringifyTokType(TokType tt);
 int fprintTok(FILE *fp, Token tok);
 int eprintTok(Token tok);
 int printTok(Token tok);

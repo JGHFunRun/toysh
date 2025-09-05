@@ -18,14 +18,14 @@ ssize_t ssgetline(SString *restrict sstr, FILE *restrict fp) {
 	return rval;
 }
 
-int ssautoiAlloc(SString *sstr, size_t i) {
+char *ssautoiAlloc(SString *sstr, size_t i) {
 	return autoiAlloc(&sstr->buf, &sstr->sz, i);
 }
 
-int sssetByte(SString *sstr, size_t i, char c) {
-	int rval = ssautoiAlloc(sstr, i);
+char *ssset(SString *sstr, size_t i, char c) {
+	char *rval = ssautoiAlloc(sstr, i);
 
-	if (rval == 0) {
+	if (rval != NULL) {
 		sstr->len = i+1 > sstr->len ? i+1 : sstr->len;
 		sstr->buf[i] = c;
 	}
