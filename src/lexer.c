@@ -68,7 +68,7 @@ static void procChar(LexerState *lexer, char c, size_t i) {
 	
 	TokType tt = categChar(c);
 
-	printf("'%c' is %s\n", c, stringifyTokType(tt));
+	printf("'%c' (0x%02hhX) is %s\n", c, c, stringifyTokType(tt));
 }
 
 TokType nextTok(LexerState *lexer) {
