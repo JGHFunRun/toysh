@@ -41,17 +41,28 @@ void initLexer(LexerState *lexer) {
 static TokType categChar(char c) {
 	CHAR_CAT(whitespace_chars, c, TOK_WHITESPACE);
 	CHAR_CAT(newline_chars, c, TOK_NEWLINE);
-
 	return TOK_LITERAL;
 }
 
 typedef enum ProcResult {
-	PROC_SUCC,
-	PROC_DELIM,
-	PROC_FAIL,
-} ProcResult;
+	/// @brief Current character could be delimited if the next character is
+	/// `EOF`.
+	PROC_DELIMABLE,
+	/// @brief A new character is absolutely needed to finish this Token.
+	///
+	/// If there is no more input (ie `EOF` reached), this will indicate an
+	/// error in the input.
+	PROC_UNDELIMABLE,
 
-static void procChar(LexerState *lexer, char c, size_t i) {
+	/// Current character corresponds to a different TokType
+	PROC_DELIM_FIRST,
+	PROC_END_TOK, ///< Current character must be last in Token
+
+	PROC_CHAR_INVAL, ///< Current character could not fit in any context
+	PROC_ERROR,
+} ProcRes;
+
+static ProcRes procChar(LexerState *lexer, char c, size_t i, Token *tok) {
 	// TODO: IMPLEMEEEENNNTINNNNGG
 	if (lexer->expan_stat != LE_NONE) {
 		eprintf("Unimplemented");
@@ -68,27 +79,42 @@ static void procChar(LexerState *lexer, char c, size_t i) {
 	
 	TokType tt = categChar(c);
 
-	printf("'%c' (0x%02hhX) is %s\n", c, c, stringifyTokType(tt));
+	if (tok->type == TOK_UNDETERMINED)
+		tok->type = tt;
+
+	if (tt != tok->type)
+		return PROC_DELIM_FIRST;
+
+	ssappend(&tok->str, c);
+
+	return PROC_DELIMABLE;
+}
+
+static void initTok(Token *tok) {
+	tok->type = TOK_UNDETERMINED;
+	initSString(&tok->str);
 }
 
 TokType nextTok(LexerState *lexer) {
-	printf("%s<EOL>\n", lexer->str.buf);
+	Token tok;
+	initTok(&tok);
 
 	if (lexer->pos == lexer->str.len) {
 		if (!lexer->is_eof) {
-			return TOK_UNDETERMINED;
+			return TOK_NEED_MORE;
 		}
 
-		// TODO: Detect if the current token can be delimited,
-		// and do so if so
+		if (lexer->is_delimable) {
+			// TODO: delimit the token
+		}
 
 		return TOK_EOF;
 	}
 
-	for (size_t i=0; i < lexer->str.len; i++) {
+	for (size_t i=lexer->pos; i < lexer->str.len; i++) {
 		char c = lexer->str.buf[i];
 
-		procChar(lexer, c, i);
+		procChar(lexer, c, i, &tok);
 	}
 
 	printf("Lexer pass ended.\n");
@@ -122,8 +148,8 @@ char const *stringifyTokType(TokType tt) {
 /// @param fp `FILE*` to print to
 /// @param tok `Token` to print
 int fprintTok(FILE *fp, Token tok) {
-	return fprintf(fp, "(%s)",
-	               stringifyTokType(tok.type));
+	return fprintf(fp, "(%s, '%s')",
+	               stringifyTokType(tok.type), tok.str.buf);
 }
 
 /// @brief Prints \p tok to `stderr`. See `fprintTok()` for more details.

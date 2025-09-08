@@ -8,13 +8,19 @@
  * distribute and/or modify it according to the terms of the MIT license.
  */
 
+#include "main.h"
+
 #include "args.h"
 #include "shell.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
+char const *invokedAs;
+
 int main(int argc, char const *const *argv) {
+	invokedAs = argv[0];
+
 	ArgInfo arg_info;
 	parseArgs(&arg_info, argc, argv);
 

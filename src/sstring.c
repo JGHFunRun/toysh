@@ -6,6 +6,12 @@
 #include "alloc.h"
 #include "filemgmt.h"
 
+void initSString(SString *sstr) {
+	sstr->buf = NULL;
+	sstr->len = 0;
+	sstr->sz = 0;
+}
+
 ssize_t ssgetline(SString *restrict sstr, FILE *restrict fp) {
 	ssize_t rval = getline(&sstr->buf, &sstr->sz, fp);
 
@@ -31,4 +37,8 @@ char *ssset(SString *sstr, size_t i, char c) {
 	}
 
 	return rval;
+}
+
+char *ssappend(SString *sstr, char c) {
+	return ssset(sstr, sstr->len, c);
 }

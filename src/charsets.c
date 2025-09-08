@@ -25,7 +25,8 @@ const Charset newline_chars = DCS_LIST("\r\n");
 const Charset basic_latin_lc = DCS_REGION('a', 'z');
 const Charset basic_latin_uc = DCS_REGION('A', 'Z');
 //const Charset basic_latin = DCS_UNION(&basic_latin_lc, &basic_latin_uc);
-/// @brief Numerals (Western Arabic/ASCII)
+
+/// @brief Western Arabic/ASCII numerals
 const Charset numerical_chars = DCS_REGION('0', '9');
 
 static const Charset period_underscore_hyphen = DCS_LIST("._-");
@@ -39,7 +40,7 @@ static const Charset period_underscore_hyphen = DCS_LIST("._-");
 /// to be the alphanumerical characters plus the characters `.`, `_`, and `-`.
 ///
 /// Note that the only portability issue I see being an issue is that some
-/// encodings such as Baudot do not actually support cas
+/// encodings such as Baudot do not actually support case
 ///
 /// `libiconv` does not actually seem to support any such encodings, but I do
 /// want to support them myself, just because I think it would be kind-of cool.
