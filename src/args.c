@@ -10,6 +10,8 @@
 
 #include "args.h"
 
+#include "invocation.h"
+
 #include <stddef.h>
 //#include <stdlib.h>
 #include <string.h>
@@ -17,7 +19,7 @@
 void parseArgs(ArgInfo *restrict arg_info,
                int argc, char const *const *restrict argv) {
 	ArgInfo wip = {
-		.shell_name = argv[0],
+		.shell_name = invoked_as,
 		.filename = argv[1],
 		.prog_argc = 0,
 		.prog_args = NULL,
