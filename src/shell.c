@@ -52,9 +52,26 @@ int sourcefp(ShellState *restrict state, FILE *restrict fp) {
 	LexerState lstate;
 	initLexer(&lstate);
 
-	lstate.str.len = getline(&lstate.str.buf, &lstate.str.sz, fp);
+	Token tok;
 
-	nextTok(&lstate);
+	TokType prev_tt = TOK_UNDETERMINED;
+
+	if (ssgetline(&lstate.str, fp) == -1) {
+		eprintf("Failed to read file\nerrno = %d\n", errno);
+		return 1;
+	}
+
+	lstate.is_eof = true;
+
+	do {
+		initTok(&tok);
+
+		eprintf("New token\n");
+		prev_tt = nextTok(&lstate, &tok);
+		eprintf("Got ");
+		eprintTok(&tok);
+		eprintf("\n");
+	} while (prev_tt < TOK_EOF);
 
 	return 0;
 }

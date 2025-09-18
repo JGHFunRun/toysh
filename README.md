@@ -36,7 +36,7 @@ git clone https://github.com/JGHFunRun/toysh.git && cd toysh
 
 mkdir build
 cd build
-cmake .. #-G'Ninja'
+cmake .. -G'Ninja'
 ninja # to build the application
 ninja doc # to build documentation
 ninja all doc # to build both

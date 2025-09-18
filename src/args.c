@@ -16,6 +16,7 @@
 //#include <stdlib.h>
 #include <string.h>
 
+// TODO: add flags
 void parseArgs(ArgInfo *restrict arg_info,
                int argc, char const *const *restrict argv) {
 	ArgInfo wip = {

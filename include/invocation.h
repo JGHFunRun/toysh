@@ -14,7 +14,7 @@
 #define INVOCATION_H 1
 
 #ifndef CONST_OUTSIDE_MAIN_C
-# ifndef IN_MAIN_C
+# ifdef IN_MAIN_C
 #  define CONST_OUTSIDE_MAIN_C /* not constant */
 # else // IN_MAIN_C
 #  define CONST_OUTSIDE_MAIN_C const

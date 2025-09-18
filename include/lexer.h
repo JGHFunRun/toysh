@@ -20,7 +20,6 @@
 typedef enum TokType {
 	TOK_COMMENT = -1,
 
-	// pseudo-tokens; these should never reach the parser
 	TOK_UNDETERMINED = 0,
 	TOK_NEED_MORE,
 
@@ -31,6 +30,7 @@ typedef enum TokType {
 	TOK_EOF,
 	TOK_ERROR,
 	TOK_UNMATCHABLE,
+	TOK_BAD_EOF,
 } TokType;
 
 typedef struct Token {
@@ -73,11 +73,12 @@ typedef struct LexerState {
 } LexerState;
 
 void initLexer(LexerState *lexer);
-TokType nextTok(LexerState *lexer);
+void initTok(Token *tok);
+TokType nextTok(LexerState *lexer, Token *tok);
 
 char const *stringifyTokType(TokType tt);
-int fprintTok(FILE *fp, Token tok);
-int eprintTok(Token tok);
-int printTok(Token tok);
+int fprintTok(FILE *fp, Token const *tok);
+int eprintTok(Token const *tok);
+int printTok(Token const *tok);
 
 #endif // LEXER_H

@@ -29,6 +29,10 @@ void initLexer(LexerState *lexer) {
 		},
 		.pos = 0,
 		.is_eof = false,
+
+		.is_delimable = false,
+		.quot_stat = LQ_UNQUOTED,
+		.expan_stat = LE_NONE,
 	};
 
 	memcpy(lexer, &wip, sizeof(LexerState));
@@ -56,27 +60,29 @@ typedef enum ProcResult {
 
 	/// Current character corresponds to a different TokType
 	PROC_DELIM_FIRST,
-	PROC_END_TOK, ///< Current character must be last in Token
+	/// Current character must be last in Token
+	PROC_END_TOK,
 
-	PROC_CHAR_INVAL, ///< Current character could not fit in any context
+	/// Current character could not fit in any context
+	PROC_CHAR_INVAL,
 	PROC_ERROR,
 } ProcRes;
 
-static ProcRes procChar(LexerState *lexer, char c, size_t i, Token *tok) {
+static ProcRes procChar(LexerState *lexer, char c, Token *tok) {
 	// TODO: IMPLEMEEEENNNTINNNNGG
 	if (lexer->expan_stat != LE_NONE) {
 		eprintf("Unimplemented");
-		assert(1==0);
+		exit(1);
 	}
 
 	if (lexer->quot_stat != LQ_UNQUOTED) {
 		eprintf("Unimplemented");
-		assert(1==0);
+		exit(1);
 	}
 
 	// TODO: some characters are operators in-and-of themselves. Currently,
 	// such characters are treated as literals. Help a parsa out?
-	
+
 	TokType tt = categChar(c);
 
 	if (tok->type == TOK_UNDETERMINED)
@@ -90,15 +96,12 @@ static ProcRes procChar(LexerState *lexer, char c, size_t i, Token *tok) {
 	return PROC_DELIMABLE;
 }
 
-static void initTok(Token *tok) {
+void initTok(Token *tok) {
 	tok->type = TOK_UNDETERMINED;
 	initSString(&tok->str);
 }
 
-TokType nextTok(LexerState *lexer) {
-	Token tok;
-	initTok(&tok);
-
+TokType nextTok(LexerState *lexer, Token *tok) {
 	if (lexer->pos == lexer->str.len) {
 		if (!lexer->is_eof) {
 			return TOK_NEED_MORE;
@@ -108,16 +111,30 @@ TokType nextTok(LexerState *lexer) {
 			// TODO: delimit the token
 		}
 
+		tok->type = TOK_EOF;
+
 		return TOK_EOF;
 	}
 
-	for (size_t i=lexer->pos; i < lexer->str.len; i++) {
-		char c = lexer->str.buf[i];
+	for (; lexer->pos < lexer->str.len; lexer->pos++) {
+		char c = lexer->str.buf[lexer->pos];
 
-		procChar(lexer, c, i, &tok);
+		eprintf("c = '%c' (0x%02hhX)\n", c, c);
+
+		ProcRes r = procChar(lexer, c, tok);
+
+		eprintf("procChar() => %d\n", r);
+
+		if (r == PROC_DELIM_FIRST) {
+			break;
+		}
+
+		eprintf("tok is now ");
+		eprintTok(tok);
+		eprintf("\n");
 	}
 
-	printf("Lexer pass ended.\n");
+	return TOK_NEED_MORE;
 }
 
 #define STR_TOK_TYPE(TOK_TYPE) \
@@ -147,17 +164,17 @@ char const *stringifyTokType(TokType tt) {
 ///
 /// @param fp `FILE*` to print to
 /// @param tok `Token` to print
-int fprintTok(FILE *fp, Token tok) {
+int fprintTok(FILE *fp, Token const *tok) {
 	return fprintf(fp, "(%s, '%s')",
-	               stringifyTokType(tok.type), tok.str.buf);
+	               stringifyTokType(tok->type), tok->str.buf);
 }
 
 /// @brief Prints \p tok to `stderr`. See `fprintTok()` for more details.
-int eprintTok(Token tok) {
+int eprintTok(Token const *tok) {
 	return fprintTok(stderr, tok);
 }
 
 /// @brief Prints \p tok to `stdout`. See `fprintTok()` for more details.
-int printTok(Token tok) {
+int printTok(Token const *tok) {
 	return fprintTok(stdout, tok);
 }
