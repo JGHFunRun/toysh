@@ -102,39 +102,32 @@ void initTok(Token *tok) {
 }
 
 TokType nextTok(LexerState *lexer, Token *tok) {
-	if (lexer->pos == lexer->str.len) {
-		if (!lexer->is_eof) {
-			return TOK_NEED_MORE;
-		}
-
-		if (lexer->is_delimable) {
-			// TODO: delimit the token
-		}
-
-		tok->type = TOK_EOF;
-
-		return TOK_EOF;
-	}
-
 	for (; lexer->pos < lexer->str.len; lexer->pos++) {
 		char c = lexer->str.buf[lexer->pos];
 
-		eprintf("c = '%c' (0x%02hhX)\n", c, c);
-
 		ProcRes r = procChar(lexer, c, tok);
 
-		eprintf("procChar() => %d\n", r);
-
 		if (r == PROC_DELIM_FIRST) {
-			break;
+			return tok->type;
 		}
 
-		eprintf("tok is now ");
-		eprintTok(tok);
-		eprintf("\n");
+		if (r == PROC_END_TOK) {
+			lexer->pos++;
+			return tok->type;
+		}
 	}
 
-	return TOK_NEED_MORE;
+	if (!lexer->is_eof) {
+		return TOK_NEED_MORE;
+	}
+
+	if (lexer->is_delimable) {
+		return tok->type;
+	}
+
+	tok->type = TOK_EOF;
+
+	return TOK_EOF;
 }
 
 #define STR_TOK_TYPE(TOK_TYPE) \

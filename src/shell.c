@@ -8,6 +8,8 @@
  * distribute and/or modify it according to the terms of the MIT license.
  */
 
+#define _GNU_SOURCE
+
 #include "shell.h"
 
 #include "filemgmt.h"

@@ -3,6 +3,7 @@
 
 #include "errors.h"
 
+#include <errno.h>
 #include <stdio.h>
 
 /// @brief A variadic <em>printf</em>-family function that outputs to `stderr`
