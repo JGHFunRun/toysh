@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2025 JGHFunRun
  *
- * This file is part of ToySH - JGHFunRun's toy shell
+ * This file is part of ToySH - JGHFunRun's Toy Shell
  *
  * This program is free software, licensed under the MIT license. You may
  * distribute and/or modify it according to the terms of the MIT license.
@@ -33,7 +33,7 @@
 
 // TODO: There should be a flag to indicate if win+unix should prefer windows or
 // unix methods
-// Perhaps with values to indicate any of the:
+// Perhaps with values to indicate any of the following:
 // * Use WIN32 code when both are perfect match,
 //      but use POSIX code when non-equivalent
 // * Always use WIN32 code
