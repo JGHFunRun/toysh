@@ -23,7 +23,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, ubuntu-latest-arm64]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
         build_type: [Debug, Release, RelWithDebInfo]
         c_compiler: [gcc, clang]
         cmake_generator: ["Unix Makefiles", Ninja]
