@@ -56,7 +56,7 @@ int sourcefp(ShellState *restrict state, FILE *restrict fp) {
 
 	Token tok;
 
-	TokType prev_tt = TOK_UNDETERMINED;
+	TokType tt;
 
 	if (ssgetline(&lstate.str, fp) == -1) {
 		eprintf("Failed to read file\nerrno = %d\n", errno);
@@ -69,11 +69,11 @@ int sourcefp(ShellState *restrict state, FILE *restrict fp) {
 		initTok(&tok);
 
 		eprintf("New token\n");
-		prev_tt = nextTok(&lstate, &tok);
+		tt = nextTok(&lstate, &tok);
 		eprintf("Got ");
 		eprintTok(&tok);
-		eprintf("\n");
-	} while (prev_tt < TOK_EOF);
+		eprintf(";\tnextTok() => %s\n", stringifyTokType(tt));
+	} while (tt < TOK_EOF);
 
 	return 0;
 }

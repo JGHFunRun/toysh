@@ -18,13 +18,13 @@
 
 // TODO: Should a seperate type be used for type of raw tokens?
 typedef enum TokType {
+	TOK_WHITESPACE = -2,
 	TOK_COMMENT = -1,
 
 	TOK_UNDETERMINED = 0,
 	TOK_NEED_MORE,
 
 	TOK_LITERAL, ///< Called simply `TOKEN` by POSIX.
-	TOK_WHITESPACE,
 	TOK_NEWLINE,
 
 	TOK_EOF,
@@ -35,7 +35,11 @@ typedef enum TokType {
 
 typedef struct Token {
 	TokType type;
-	SString str;
+
+	union {
+		SString str;
+		char c;
+	};
 } Token;
 
 
@@ -67,6 +71,7 @@ typedef struct LexerState {
 	bool is_eof;
 
 	bool is_delimable;
+	bool amidst_comment;
 
 	LexerQuoting quot_stat;
 	LexerExpanding expan_stat;

@@ -38,16 +38,6 @@ void initLexer(LexerState *lexer) {
 	memcpy(lexer, &wip, sizeof(LexerState));
 }
 
-#define CHAR_CAT(CHARSET, CHAR, TYPE) \
-	if (isInCharset(&(CHARSET), CHAR)) \
-		return TYPE;
-
-static TokType categChar(char c) {
-	CHAR_CAT(whitespace_chars, c, TOK_WHITESPACE);
-	CHAR_CAT(newline_chars, c, TOK_NEWLINE);
-	return TOK_LITERAL;
-}
-
 typedef enum ProcResult {
 	/// @brief Current character could be delimited if the next character is
 	/// `EOF`.
@@ -68,7 +58,22 @@ typedef enum ProcResult {
 	PROC_ERROR,
 } ProcRes;
 
+// TODO: It's getting long
 static ProcRes procChar(LexerState *lexer, char c, Token *tok) {
+	if (lexer->amidst_comment) {
+		assert(tok->type == TOK_UNDETERMINED);
+
+		if (isInCharset(&newline_chars, c)) {
+			tok->type = TOK_NEWLINE;
+
+			ssappend(&tok->str, c);
+		} else {
+			eprintf("Inside a comment; discarding [%c]\n", c);
+		}
+
+		return PROC_DELIMABLE;
+	}
+
 	// TODO: IMPLEMEEEENNNTINNNNGG
 	if (lexer->expan_stat != LE_NONE) {
 		eprintf("Unimplemented");
@@ -83,12 +88,38 @@ static ProcRes procChar(LexerState *lexer, char c, Token *tok) {
 	// TODO: some characters are operators in-and-of themselves. Currently,
 	// such characters are treated as literals. Help a parsa out?
 
-	TokType tt = categChar(c);
+	if (c == '#') {
+		if (tok->type != TOK_UNDETERMINED)
+			return PROC_DELIM_FIRST;
+
+		lexer->amidst_comment = true;
+
+		return PROC_DELIMABLE;
+	}
+
+	if (isInCharset(&whitespace_chars, c)) {
+		if (tok->type != TOK_UNDETERMINED)
+			return PROC_DELIM_FIRST;
+
+		return PROC_DELIMABLE;
+	}
+
+	if (isInCharset(&newline_chars, c)) {
+		if (tok->type == TOK_UNDETERMINED)
+			tok->type = TOK_NEWLINE;
+
+		if (tok->type != TOK_NEWLINE)
+			return PROC_DELIM_FIRST;
+
+		ssappend(&tok->str, c);
+
+		return PROC_DELIMABLE;
+	}
 
 	if (tok->type == TOK_UNDETERMINED)
-		tok->type = tt;
+		tok->type = TOK_LITERAL;
 
-	if (tt != tok->type)
+	if (tok->type != TOK_LITERAL)
 		return PROC_DELIM_FIRST;
 
 	ssappend(&tok->str, c);
@@ -111,6 +142,8 @@ TokType nextTok(LexerState *lexer, Token *tok) {
 			return tok->type;
 		}
 
+		lexer->is_delimable = r == PROC_DELIMABLE;
+
 		if (r == PROC_END_TOK) {
 			lexer->pos++;
 			return tok->type;
@@ -121,8 +154,12 @@ TokType nextTok(LexerState *lexer, Token *tok) {
 		return TOK_NEED_MORE;
 	}
 
-	if (lexer->is_delimable) {
-		return tok->type;
+	if (tok->type != TOK_UNDETERMINED) {
+		if (lexer->is_delimable) {
+			return tok->type;
+		} else {
+			return TOK_BAD_EOF;
+		}
 	}
 
 	tok->type = TOK_EOF;
@@ -136,11 +173,9 @@ TokType nextTok(LexerState *lexer, Token *tok) {
 
 char const *stringifyTokType(TokType tt) {
 	switch (tt) {
-		STR_TOK_TYPE(TOK_COMMENT);
 		STR_TOK_TYPE(TOK_UNDETERMINED);
 
 		STR_TOK_TYPE(TOK_LITERAL);
-		STR_TOK_TYPE(TOK_WHITESPACE);
 		STR_TOK_TYPE(TOK_NEWLINE);
 
 		STR_TOK_TYPE(TOK_EOF);
