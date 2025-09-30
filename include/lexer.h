@@ -18,8 +18,7 @@
 
 // TODO: Should a seperate type be used for type of raw tokens?
 typedef enum TokType {
-	TOK_WHITESPACE = -2,
-	TOK_COMMENT = -1,
+	//TOK_COMMENT = -1,
 
 	TOK_UNDETERMINED = 0,
 	TOK_NEED_MORE,
@@ -52,7 +51,7 @@ typedef enum LexerQuoting {
 
 typedef enum LexerExpanding {
 	LE_NONE,
-	//LE_BACKTICK,
+	LE_BACKTICK,
 	LE_DS_SEARCHING,
 	LE_DS_SIMPLEVAR,
 	LE_DS_CB,
@@ -66,6 +65,7 @@ typedef enum LexerMode {
 } LexerMode;
 
 typedef struct LexerState {
+	// TODO: Make a wrapper to versatilely read the next character...
 	SString str;
 	size_t pos;
 	bool is_eof;

@@ -18,16 +18,16 @@
 
 const Charset nonascii_chars = DCS_REGION(0x80, 0xFF);
 
-const Charset whitespace_chars = DCS_LIST(" \t");
-const Charset newline_chars = DCS_LIST("\r\n");
+const Charset whitespace_chars = DCS_LIST(u8" \t");
+const Charset newline_chars = DCS_LIST(u8"\r\n");
 //const Charset ignorable_chars = DCS_LIST("\r");
 
-const Charset basic_latin_lc = DCS_REGION('a', 'z');
-const Charset basic_latin_uc = DCS_REGION('A', 'Z');
+const Charset basic_latin_lc = DCS_REGION(u8'a', u8'z');
+const Charset basic_latin_uc = DCS_REGION(u8'A', u8'Z');
 //const Charset basic_latin = DCS_UNION(&basic_latin_lc, &basic_latin_uc);
 
 /// @brief Western Arabic/ASCII numerals
-const Charset numerical_chars = DCS_REGION('0', '9');
+const Charset numerical_chars = DCS_REGION(u8'0', u8'9');
 
 static const Charset period_underscore_hyphen = DCS_LIST("._-");
 

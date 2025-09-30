@@ -63,6 +63,22 @@ int sourcefp(ShellState *restrict state, FILE *restrict fp) {
 		return 1;
 	}
 
+	do {
+		initTok(&tok);
+
+		eprintf("New token\n");
+		tt = nextTok(&lstate, &tok);
+		eprintf("Got ");
+		eprintTok(&tok);
+		eprintf(";\tnextTok() => %s\n", stringifyTokType(tt));
+	} while (tt != TOK_NEWLINE);
+
+	if (ssgetline(&lstate.str, fp) == -1) {
+		eprintf("Failed to read file\nerrno = %d\n", errno);
+		return 1;
+	}
+
+	lstate.pos = 0;
 	lstate.is_eof = true;
 
 	do {
@@ -73,7 +89,7 @@ int sourcefp(ShellState *restrict state, FILE *restrict fp) {
 		eprintf("Got ");
 		eprintTok(&tok);
 		eprintf(";\tnextTok() => %s\n", stringifyTokType(tt));
-	} while (tt < TOK_EOF);
+	} while (tt != TOK_EOF);
 
 	return 0;
 }

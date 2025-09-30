@@ -58,18 +58,33 @@ typedef enum ProcResult {
 	PROC_ERROR,
 } ProcRes;
 
+static ProcRes tryAppendChar(Token *tok, char c, TokType tt, ProcRes succ_val) {
+	if (tok->type == TOK_UNDETERMINED)
+		tok->type = tt;
+
+	if (tok->type != tt)
+		return PROC_DELIM_FIRST;
+
+	ssappend(&tok->str, c);
+
+	return succ_val;
+}
+
 // TODO: It's getting long
 static ProcRes procChar(LexerState *lexer, char c, Token *tok) {
 	if (lexer->amidst_comment) {
 		assert(tok->type == TOK_UNDETERMINED);
 
 		if (isInCharset(&newline_chars, c)) {
+			lexer->amidst_comment = false;
 			tok->type = TOK_NEWLINE;
 
 			ssappend(&tok->str, c);
-		} else {
-			eprintf("Inside a comment; discarding [%c]\n", c);
+
+			return PROC_END_TOK;
 		}
+
+		eprintf("Inside a comment; discarding [%c]\n", c);
 
 		return PROC_DELIMABLE;
 	}
@@ -105,26 +120,10 @@ static ProcRes procChar(LexerState *lexer, char c, Token *tok) {
 	}
 
 	if (isInCharset(&newline_chars, c)) {
-		if (tok->type == TOK_UNDETERMINED)
-			tok->type = TOK_NEWLINE;
-
-		if (tok->type != TOK_NEWLINE)
-			return PROC_DELIM_FIRST;
-
-		ssappend(&tok->str, c);
-
-		return PROC_DELIMABLE;
+		return tryAppendChar(tok, c, TOK_NEWLINE, PROC_END_TOK);
 	}
 
-	if (tok->type == TOK_UNDETERMINED)
-		tok->type = TOK_LITERAL;
-
-	if (tok->type != TOK_LITERAL)
-		return PROC_DELIM_FIRST;
-
-	ssappend(&tok->str, c);
-
-	return PROC_DELIMABLE;
+	return tryAppendChar(tok, c, TOK_LITERAL, PROC_DELIMABLE);
 }
 
 void initTok(Token *tok) {
