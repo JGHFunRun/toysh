@@ -15,3 +15,4 @@ add_executable(toysh src/main.c src/args.c
 add_subdirectory(include/)
 
 add_subdirectory(doc/)
+add_subdirectory(man/)
