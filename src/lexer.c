@@ -77,14 +77,9 @@ static ProcRes procChar(LexerState *lexer, char c, Token *tok) {
 
 		if (isInCharset(&newline_chars, c)) {
 			lexer->amidst_comment = false;
-			tok->type = TOK_NEWLINE;
 
-			ssappend(&tok->str, c);
-
-			return PROC_END_TOK;
+			return tryAppendChar(tok, c, TOK_NEWLINE, PROC_END_TOK);
 		}
-
-		eprintf("Inside a comment; discarding [%c]\n", c);
 
 		return PROC_DELIMABLE;
 	}
@@ -173,16 +168,21 @@ TokType nextTok(LexerState *lexer, Token *tok) {
 char const *stringifyTokType(TokType tt) {
 	switch (tt) {
 		STR_TOK_TYPE(TOK_UNDETERMINED);
+		STR_TOK_TYPE(TOK_NEED_MORE);
 
 		STR_TOK_TYPE(TOK_LITERAL);
 		STR_TOK_TYPE(TOK_NEWLINE);
 
 		STR_TOK_TYPE(TOK_EOF);
+
 		STR_TOK_TYPE(TOK_ERROR);
 		STR_TOK_TYPE(TOK_UNMATCHABLE);
-		//default:
-		//	eprintf("Unknown TokType during stringification: %d\n", tt);
-		//	exit(3);
+		STR_TOK_TYPE(TOK_BAD_EOF);
+
+		// I wish GCC gave a warning about incomplete enum matches...
+		default:
+			eprintf("Unknown TokType during stringification: %d\n", tt);
+			exit(3);
 	}
 }
 

@@ -13,7 +13,7 @@
 #include "shell.h"
 
 #include "filemgmt.h"
-#include "lexer.h"
+#include "parser.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -51,45 +51,11 @@ void initShell(ShellState *restrict output, ArgInfo const *restrict arg_info) {
 }
 
 int sourcefp(ShellState *restrict state, FILE *restrict fp) {
-	LexerState lstate;
-	initLexer(&lstate);
+	ParserState pstate;
 
-	Token tok;
+	initParser(&pstate);
 
-	TokType tt;
-
-	if (ssgetline(&lstate.str, fp) == -1) {
-		eprintf("Failed to read file\nerrno = %d\n", errno);
-		return 1;
-	}
-
-	do {
-		initTok(&tok);
-
-		eprintf("New token\n");
-		tt = nextTok(&lstate, &tok);
-		eprintf("Got ");
-		eprintTok(&tok);
-		eprintf(";\tnextTok() => %s\n", stringifyTokType(tt));
-	} while (tt != TOK_NEWLINE);
-
-	if (ssgetline(&lstate.str, fp) == -1) {
-		eprintf("Failed to read file\nerrno = %d\n", errno);
-		return 1;
-	}
-
-	lstate.pos = 0;
-	lstate.is_eof = true;
-
-	do {
-		initTok(&tok);
-
-		eprintf("New token\n");
-		tt = nextTok(&lstate, &tok);
-		eprintf("Got ");
-		eprintTok(&tok);
-		eprintf(";\tnextTok() => %s\n", stringifyTokType(tt));
-	} while (tt != TOK_EOF);
+	parseLine(&pstate);
 
 	return 0;
 }

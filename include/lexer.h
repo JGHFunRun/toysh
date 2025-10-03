@@ -27,6 +27,7 @@ typedef enum TokType {
 	TOK_NEWLINE,
 
 	TOK_EOF,
+
 	TOK_ERROR,
 	TOK_UNMATCHABLE,
 	TOK_BAD_EOF,
@@ -35,10 +36,7 @@ typedef enum TokType {
 typedef struct Token {
 	TokType type;
 
-	union {
-		SString str;
-		char c;
-	};
+	SString str;
 } Token;
 
 
